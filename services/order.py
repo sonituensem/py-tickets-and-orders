@@ -1,6 +1,7 @@
 from typing import Optional, List
 from django.db import transaction
 from django.utils.dateparse import parse_datetime
+from django.db.models import QuerySet
 
 from db.models import Order, Ticket, User, MovieSession
 
@@ -35,7 +36,7 @@ def create_order(
     return order
 
 
-def get_orders(username: Optional[str] = None):
+def get_orders(username: Optional[str] = None) -> QuerySet[Order]:
     queryset = (
         Order.objects.all()
         .select_related("user")
