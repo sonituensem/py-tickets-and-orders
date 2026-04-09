@@ -21,7 +21,9 @@ def create_order(
 
     # Создаём все тикеты
     for ticket_data in tickets:
-        movie_session = MovieSession.objects.get(id=ticket_data["movie_session"])
+        movie_session = MovieSession.objects.get(
+            id=ticket_data["movie_session"]
+        )
         Ticket.objects.create(
             movie_session=movie_session,
             order=order,
@@ -33,7 +35,11 @@ def create_order(
 
 
 def get_orders(username: Optional[str] = None) -> QuerySet[Order]:
-    queryset = Order.objects.all().select_related("user").prefetch_related("tickets")
+    queryset = (
+        Order.objects.all()
+        .select_related("user")
+        .prefetch_related("tickets")
+    )
     if username:
         queryset = queryset.filter(user__username=username)
     return queryset
