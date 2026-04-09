@@ -1,36 +1,36 @@
-from typing import Optional, List
+from typing import List, Optional
+from datetime import datetime
 from django.db import transaction
-from django.utils.dateparse import parse_datetime
+from django.contrib.auth import get_user_model
+from db.models import Order, Ticket, MovieSession
 from django.db.models import QuerySet
 
-from db.models import Order, Ticket, User, MovieSession
+User = get_user_model()
 
 
 @transaction.atomic
 def create_order(
-    tickets: List[dict], username: str, date: Optional[str] = None
+    tickets: List[dict],
+    username: str,
+    date: Optional[datetime] = None,
 ) -> Order:
     user = User.objects.get(username=username)
-
-    created_at = parse_datetime(date) if date else None
-
     order = Order.objects.create(user=user)
-    if created_at:
-        Order.objects.filter(id=order.id).update(created_at=created_at)
+
+    if date:
+        Order.objects.filter(pk=order.pk).update(created_at=date)
         order.refresh_from_db()
 
-    # Создаём все тикеты
-    for ticket_data in tickets:
-        movie_session = MovieSession.objects.get(
-            id=ticket_data["movie_session"]
-        )
-        Ticket.objects.create(
-            movie_session=movie_session,
+    ticket_objs = [
+        Ticket(
             order=order,
-            row=ticket_data["row"],
-            seat=ticket_data["seat"],
+            row=ticket["row"],
+            seat=ticket["seat"],
+            movie_session=MovieSession.objects.get(pk=ticket["movie_session"])
         )
-
+        for ticket in tickets
+    ]
+    Ticket.objects.bulk_create(ticket_objs)
     return order
 
 

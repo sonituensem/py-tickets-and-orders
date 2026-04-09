@@ -34,19 +34,16 @@ def create_movie(
     actors_ids: Optional[List[int]] = None,
     genres_ids: Optional[List[int]] = None,
 ) -> Movie:
-    # 1. Validate IDs first
     if genres_ids and not all(isinstance(gid, int) for gid in genres_ids):
         raise ValueError("All genres_ids must be integers")
     if actors_ids and not all(isinstance(aid, int) for aid in actors_ids):
         raise ValueError("All actors_ids must be integers")
 
-    # 2. Create the movie
     movie = Movie.objects.create(
         title=movie_title,
         description=movie_description,
     )
 
-    # 3. Assign many-to-many relationships safely
     if actors_ids:
         actors = Actor.objects.filter(id__in=actors_ids)
         movie.actors.set(actors)

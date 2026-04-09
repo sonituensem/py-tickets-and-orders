@@ -1,5 +1,8 @@
-from db.models import User
 from typing import Optional
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 
 def create_user(
@@ -24,10 +27,6 @@ def create_user(
 
 
 def get_user(user_id: int) -> User:
-    """
-    Возвращает пользователя по его ID.
-    Выбрасывает User.DoesNotExist, если пользователь не найден.
-    """
     return User.objects.get(id=user_id)
 
 
@@ -39,11 +38,7 @@ def update_user(
     first_name: Optional[str] = None,
     last_name: Optional[str] = None,
 ) -> User:
-    """
-    Обновляет поля пользователя.
-    Пароль хэшируется методом set_password().
-    """
-    user = User.objects.get(id=user_id)
+    user = get_user(user_id)
 
     if username:
         user.username = username
